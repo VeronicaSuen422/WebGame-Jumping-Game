@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jumping Game</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- This is the font returned from Google font -->
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+    /* Style to make the svg fit in the browser */
+    body { padding: 0; margin: 0; }
+    svg  { width: 100%; height: auto; }
+    @keyframes cloud-animation {
+        from { transform: translateX(1000px); }
+        to   { transform: translateX(-120px); }
+    }
+    #cloud1 {
+        animation-name: cloud-animation;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        animation-duration: 10s;
+    }  
+    #cloud2 {
+        animation-name: cloud-animation;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        animation-duration: 20s;
+        animation-delay: -5s;
+    }
+    @keyframes obstacle-animation {
+        from {transform: translateX(1000px); }
+        to   {transform: translateX(-120px); }
+    }
+    #obstacle {
+        animation-name: none;
+        animation-timing-function: linear;
+        animation-iteration-count: initial;
+        animation-duration: 10s;
+        display: none;
+    }
+    @keyframes player-animation {
+        0%   {transform: translateY(0px); }
+        50%  {transform: translateY(-50px); }
+        100% {transform: translateY(0px); }
+    }
+    #player {
+        animation-name: none;
+        animation-iteration-count: initial;
+        animation-duration: 2s;
+        animation-delay: 0s;
+    }
+    /* The container moves the text to the middle of the screen */
+    @keyframes fadeIn {
+        0%   {opacity: 0;}
+        100% {opacity: 1;}
+    }
+    #gameover-container {
+        transform: translate(500px,200px);
+    }
+    #gameover {
+        font-family: Dosis, sans-serif;
+        animation-name: none;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        animation-duration: 4s;
+    }
+    </style>
+    <script>
+    // Check whether the game is over if the player is near the obstacle
+    function checkGameover() {
+
+        // You need to keep on checking for the gameover situation here
+        setTimeout(checkGameover, 100);
+        // Read the transform property of the player and obstacle
+        // Extract the appropriate numbers
+        let player_position_x = $("#player")[0].getBoundingClientRect().x;
+        let player_position_y = $("#player")[0].getBoundingClientRect().y;
+        let obstacle_postion_x = $("#obstacle")[0].getBoundingClientRect().x;
+        let obstacle_postion_y = $("#obstacle")[0].getBoundingClientRect().y;
+        // Compare the numbers for the gameover situation       
+        offset_x = (player_position_x - obstacle_postion_x);
+        offset_y = Math.abs(player_position_y - obstacle_postion_y) - 172;
+        if((offset_x < 10 && offset_x > 0) && offset_y < 10) {
+            $("#cloud1").css("animation-play-state", "paused");
+            $("#cloud2").css("animation-play-state", "paused");
+            $("#obstacle").css("animation-play-state", "paused");
+            $("#player").css("animation-play-state", "paused");
+            $("#gameover").show();
+            $("#gameover").css("animation-name", "fadeIn");
+        } else {
+            // Request to check again
+            setTimeout(checkGameover, 100);
+        }
+    }
+
+    // Make an obstacle by starting the obstacle animation
+    function makeObstacle() {
+        // You need to show the obstacle and start the animation here
+        $("#obstacle").show();
+        $("#obstacle").css("animation-name", "obstacle-animation");
+    }
+
+    // Make the player jump by starting the player animation
+    function jump() {
+        // You need to start the player jumping animation here
+        $("#player").css("animation-name", "player-animation");
+    }
+
+    $(document).ready(function () {
+        // Handle the spacebar key for controlling the player
+        $(document).on("keydown", function(e) {
+            // The player jumps if the spacebar key is down
+            if (e.keyCode == 32)
+                jump();
+        });
+
+        // The obstacle animation has finished
+        $("#obstacle").on("animationend", function() {
+            $("#obstacle").hide();
+            $("#obstacle").css("animation-name", "none");
+            // You will make another obstacle later
+            setTimeout(makeObstacle, 200);
+        });
+
+        // The player animation has finished
+        $("#player").on("animationend", function() {
+            $("#player").css("animation-name", "none");
+        });
+
+        // Start the game over checking
+        setTimeout(checkGameover, 3000);
+
+        // Start the obstacle animation
+        setTimeout(makeObstacle, Math.random() * 2000);
+    });
+    </script>
+</head>
+<body>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400">   
+        <defs>
+            <lineargradient id="sky_gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:rgb(1, 153, 255);stop-opacity:1"></stop>
+                <stop offset="100%" style="stop-color: rgb(204, 235, 255);stop-opacity:1"></stop>  
+            </lineargradient>
+            <lineargradient id="ground_gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:rgb(179, 255, 179);stop-opacity:1"></stop>
+                <stop offset="100%" style="stop-color: rgb(0, 204, 0);stop-opacity:1"></stop>
+            </lineargradient>
+        </defs>
+        <rect fill="url(#sky_gradient)" height="300" width="1000" y="0" x="0" stroke="none"/>   
+        <rect fill="url(#ground_gradient)" height="100" width="1000" y="300" x="0" stroke="none"/> 
+        <g id="cloud1">
+            <ellipse cx="76.71952" cy="72.72527" fill="#ffffff" id="svg_1" rx="26.95121" ry="16.87912" stroke="#ffffff"/>
+            <ellipse cx="49.37197" cy="86.79121" fill="#ffffff" id="svg_2" rx="46.37195" ry="20.39561" stroke="#ffffff" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+            <ellipse cx="97.32928" cy="86.08791" fill="#ffffff" id="svg_3" rx="35.67072" ry="23.91209" stroke="#ffffff" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+            <ellipse cx="34.70733" cy="67.09891" fill="#ffffff" id="svg_4" rx="26.15854" ry="21.09891" stroke="#ffffff" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+        </g>
+        <g id="cloud2">
+            <path d="m62.2796,1.70647c-9.09271,0 -16.89728,3.76034 -20.71759,9.18894c-1.52576,-0.67929 -3.20862,-1.09061 -5.0047,-1.09061c-5.43146,0 -9.95114,3.4844 -11.34811,8.21435c-2.3844,-0.75158 -5.1568,-1.20663 -8.11823,-1.20663c-8.88425,0 -16.09097,3.8764 -16.09097,8.65524c0,4.31372 5.91049,7.85998 13.58859,8.516c-0.34412,0.46562 -0.61105,0.92671 -0.61105,1.41547c0,4.57548 15.71915,8.30716 35.0918,8.30716c19.3725,0 35.09161,-3.73169 35.09161,-8.30716c0,-0.30785 -0.23956,-0.58259 -0.37823,-0.88177c0.84851,0.16828 1.68872,0.34807 2.61877,0.34807c5.1825,0.00001 9.39856,-2.80815 9.39856,-6.26518c0,-3.45704 -4.21613,-6.26518 -9.39856,-6.26518c-0.63507,0 -1.17505,0.17494 -1.7749,0.25525c0.52441,-1.3823 0.87292,-2.79274 0.87292,-4.29281c0,-9.15096 -10.38715,-16.59113 -23.21985,-16.59113l-0.00006,-0.00001z" fill="#ffffff" id="svg_4" stroke="#ffffff" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+        </g>
+        <g id="obstacle">
+            <ellipse cx="111.5" cy="313.9359" fill="#00ffff" id="svg_1" rx="33" ry="10.4359" stroke="#000000" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null" stroke-opacity="0"/>
+        </g>
+        <g id="player">
+            <ellipse cx="114.58477" cy="234.21212" fill="#ffff00" id="svg_6" rx="20.48565" ry="21.21212" stroke="#ffff00" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+            <ellipse cx="115.56028" cy="272.59596" fill="#ffff00" id="svg_7" rx="18.53463" ry="30.30303" stroke="#ffff00" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+            <ellipse cx="80.32417" cy="347.15233" fill="#ffff00" id="svg_8" rx="21.37915" ry="6" stroke="#ffff00" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null" transform="matrix(0.940836 0.266904 -0.257763 0.9742 105.572 -67.8469)"/>
+            <ellipse cx="107.75622" cy="304.91919" fill="#ffff00" id="svg_9" rx="6.82855" ry="7.07071" stroke="#ffff00" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+            <ellipse cx="123.36434" cy="305.92929" fill="#ffff00" id="svg_10" rx="6.82855" ry="7.07071" stroke="#ffff00" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+            <ellipse cx="107.75622" cy="229.16162" fill="#000000" id="svg_11" rx="3.90203" ry="4.0404" stroke="#000000" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+            <ellipse cx="123.36434" cy="229.16162" fill="#000000" id="svg_12" rx="3.90203" ry="4.0404" stroke="#000000" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null"/>
+            <ellipse cx="97.02758" cy="234.41331" fill="#ffff00" id="svg_13" rx="10.70074" ry="3.75336" stroke="#ffff00" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null" transform="matrix(0.967313 -0.130646 0.126171 1.00162 -30.6205 38.0715)"/>
+            <ellipse cx="128.58977" cy="305.35256" fill="#ffff00" id="svg_14" rx="10.70074" ry="3.75336" stroke="#ffff00" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null" transform="matrix(0.950505 0.227223 -0.219441 0.984212 83.4424 -71.5831)"/>
+            <line fill="none" id="svg_16" stroke="#000000" stroke-dasharray="null" stroke-linecap="null" stroke-linejoin="null" x1="108.73173" x2="121.45079" y1="245.32323" y2="245.32323"/>
+        </g>
+        <!-- The game over text -->
+        <g id="gameover-container">
+            <text id="gameover" x="0" y="0" fill="red" font-size="80px" text-anchor="middle" display="none">Game Over</text>
+        </g>
+    </svg>
+</html>
